@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% from "_macros.html" import phase_badge %}
+{% block title %}Painel do médico{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ user.name }}</h1>
+    <p class="muted">Painel do médico · {{ user.doctor_profile.specialty }}</p>
+  </div>
+  <a class="btn btn-primary" href="/medico/disponibilidade">Configurar disponibilidade</a>
+</div>
+
+<section class="card">
+  <h2>Agenda: próximas consultas</h2>
+  {% if upcoming %}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Data</th><th>Horário</th><th>Paciente</th><th>Situação</th><th>Ações</th></tr></thead>
+    <tbody>
+    {% for a in upcoming %}
+      <tr>
+        <td>{{ a.start_at | date_long }}</td>
+        <td>{{ a.start_at | hm }}–{{ a.end_at | hm }}</td>
+        <td>{{ a.patient.name }}</td>
+        <td>{{ phase_badge(a) }}</td>
+        <td class="actions">
+          <a class="btn btn-small btn-primary" href="/consultas/{{ a.id }}/sala">Sala</a>
+          <a class="btn btn-small btn-secondary" href="/consultas/{{ a.id }}">Detalhes</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="empty">Nenhuma consulta agendada. <a href="/medico/disponibilidade">Cadastre períodos de disponibilidade</a> para receber agendamentos.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Consultas encerradas</h2>
+  {% if past %}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Data</th><th>Paciente</th><th>Prontuário</th><th>Ações</th></tr></thead>
+    <tbody>
+    {% for a in past %}
+      <tr>
+        <td>{{ a.start_at | dt }}</td>
+        <td>{{ a.patient.name }}</td>
+        <td>{% if a.record %}<span class="badge badge-ok">registrado</span>{% else %}<span class="badge badge-pendente">pendente</span>{% endif %}</td>
+        <td class="actions">
+          <a class="btn btn-small btn-secondary" href="/consultas/{{ a.id }}/prontuario">{{ 'Editar' if a.record else 'Registrar' }}</a>
+          <a class="btn btn-small btn-link" href="/consultas/{{ a.id }}">Detalhes</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="empty">Nenhuma consulta encerrada.</p>
+  {% endif %}
+</section>
+
+{% if cancelled %}
+<section class="card">
+  <h2>Cancelamentos recentes</h2>
+  <ul class="plain">
+    {% for a in cancelled %}<li>{{ a.start_at | dt }} · {{ a.patient.name }} {{ phase_badge(a) }}</li>{% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

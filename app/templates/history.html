@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_macros.html" import phase_badge, record_view, fictitious_tag %}
+{% block title %}Histórico clínico{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Histórico clínico {{ fictitious_tag() }}</h1>
+    <p class="muted">Registros feitos pelos médicos nas suas consultas. Somente leitura.</p>
+  </div>
+</div>
+{% for a in appointments %}
+<section class="card">
+  <h2>{{ a.start_at | date_long }}, {{ a.start_at | hm }} {{ phase_badge(a) }}</h2>
+  <p>{{ a.doctor.name }} · <span class="muted">{{ a.doctor.doctor_profile.specialty }}</span> · <a href="/consultas/{{ a.id }}">detalhes</a></p>
+  {% if a.record %}
+    {{ record_view(a.record) }}
+  {% else %}
+    <p class="empty">Sem registro clínico para esta consulta.</p>
+  {% endif %}
+</section>
+{% else %}
+<section class="card"><p class="empty">Nenhuma consulta realizada ainda.</p></section>
+{% endfor %}
+{% endblock %}

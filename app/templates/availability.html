@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field_error, form_error %}
+{% block title %}Disponibilidade{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Disponibilidade</h1>
+    <p class="muted">Cadastre períodos em que você pode atender. O sistema gera consultas de 30 minutos com 5 minutos de intervalo.</p>
+  </div>
+</div>
+
+<section class="card">
+  <h2>Novo período</h2>
+  {{ form_error(errors) }}
+  <form method="post" action="/medico/disponibilidade" class="form-row" novalidate>
+    <div>
+      <label for="day">Data</label>
+      <input id="day" name="day" type="date" min="{{ today }}" value="{{ values.get('day', today) }}" required>
+      {{ field_error(errors, 'day') }}
+    </div>
+    <div>
+      <label for="start_time">Início</label>
+      <input id="start_time" name="start_time" type="time" step="300" value="{{ values.get('start_time', '08:00') }}" required>
+      {{ field_error(errors, 'start_time') }}
+    </div>
+    <div>
+      <label for="end_time">Fim</label>
+      <input id="end_time" name="end_time" type="time" step="300" value="{{ values.get('end_time', '12:00') }}" required>
+      {{ field_error(errors, 'end_time') }}
+    </div>
+    <div class="form-row-action">
+      <button class="btn btn-primary" type="submit">Adicionar período</button>
+    </div>
+  </form>
+  <p class="hint">Exemplo: 08:00–12:00 gera horários às 08:00, 08:35, 09:10, 09:45, 10:20, 10:55 e 11:30. Fuso: {{ timezone_name }}.</p>
+</section>
+
+<section class="card">
+  <h2>Períodos futuros</h2>
+  {% for row in rows %}
+  <div class="period">
+    <div class="period-head">
+      <div>
+        <strong>{{ row.period.start_at | date_long }}</strong>, {{ row.period.start_at | hm }}–{{ row.period.end_at | hm }}
+        <span class="muted small">· {{ row.free }} livre(s), {{ row.taken }} agendado(s)</span>
+      </div>
+      <form method="post" action="/medico/disponibilidade/{{ row.period.id }}/excluir" class="inline"
+            onsubmit="return confirm('Excluir este período?');">
+        <button class="btn btn-small btn-danger" type="submit">Excluir</button>
+      </form>
+    </div>
+    <div class="slots">
+      {% for s in row.slots %}
+        <span class="slot {{ 'slot-taken' if s.taken else ('slot-past' if s.past else 'slot-free') }}"
+              title="{{ 'Agendado' if s.taken else ('Horário passado' if s.past else 'Livre') }}">{{ s.start | hm }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <p class="empty">Nenhum período futuro cadastrado.</p>
+  {% endfor %}
+  <p class="legend small"><span class="slot slot-free">livre</span> <span class="slot slot-taken">agendado</span> <span class="slot slot-past">passado</span></p>
+</section>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ doctor.name }}{% endblock %}
+{% block content %}
+<p><a href="/medicos">← Voltar para a lista</a></p>
+<section class="card">
+  <h1>{{ doctor.name }}</h1>
+  <p class="specialty">{{ doctor.doctor_profile.specialty }} <span class="muted small">· {{ doctor.doctor_profile.registry }}</span></p>
+  <p>{{ doctor.doctor_profile.bio }}</p>
+</section>
+
+<section class="card">
+  <h2>Horários disponíveis</h2>
+  <p class="muted small">Consultas de 30 minutos, com 5 minutos de intervalo. Apenas horários futuros e livres são exibidos (fuso: {{ timezone_name }}).</p>
+  {% if days %}
+    {% for key, slots in days %}
+    <div class="day">
+      <h3>{{ slots[0].start | date_long }}</h3>
+      <div class="slots">
+        {% for s in slots %}
+        <a class="slot" href="/agendar?medico={{ doctor.id }}&inicio={{ s.start.isoformat() | urlencode }}">{{ s.start | hm }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="empty">Este médico não possui horários disponíveis no momento.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% from "_macros.html" import phase_badge %}
+{% block title %}Painel do paciente{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Olá, {{ user.name }}</h1>
+    <p class="muted">Painel do paciente</p>
+  </div>
+  <a class="btn btn-primary" href="/medicos">Agendar consulta</a>
+</div>
+
+<div class="steps">
+  <div class="step"><span>1</span> Escolha um médico e um horário</div>
+  <div class="step"><span>2</span> Confirme o agendamento</div>
+  <div class="step"><span>3</span> Entre na sala no horário da consulta</div>
+  <div class="step"><span>4</span> Consulte o histórico clínico</div>
+</div>
+
+<section class="card">
+  <h2>Próximas consultas</h2>
+  {% if upcoming %}
+  <ul class="appt-list">
+    {% for a in upcoming %}
+    <li class="appt-item">
+      <div>
+        <strong>{{ a.start_at | date_long }}</strong>, {{ a.start_at | hm }}–{{ a.end_at | hm }} {{ phase_badge(a) }}<br>
+        {{ a.doctor.name }} · <span class="muted">{{ a.doctor.doctor_profile.specialty }}</span>
+      </div>
+      <div class="actions">
+        <a class="btn btn-secondary" href="/consultas/{{ a.id }}">Detalhes</a>
+        <a class="btn btn-primary" href="/consultas/{{ a.id }}/sala">Entrar na sala</a>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">Você não tem consultas agendadas. <a href="/medicos">Ver médicos e horários</a>.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Histórico</h2>
+  <p>Consultas realizadas e registros clínicos estão em <a href="/paciente/historico">Histórico clínico</a>.</p>
+  {% if cancelled %}
+  <h3>Cancelamentos recentes</h3>
+  <ul class="plain">
+    {% for a in cancelled %}
+    <li>{{ a.start_at | dt }} · {{ a.doctor.name }} {{ phase_badge(a) }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% endblock %}

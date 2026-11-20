@@ -1,0 +1,32 @@
+{% macro field_error(errors, name) -%}
+  {% if errors.get(name) %}<p class="field-error" id="err-{{ name }}">{{ errors[name] }}</p>{% endif %}
+{%- endmacro %}
+
+{% macro form_error(errors) -%}
+  {% if errors.get('__all__') %}<div class="alert alert-erro" role="alert">{{ errors['__all__'] }}</div>{% endif %}
+{%- endmacro %}
+
+{% macro phase_badge(appt) -%}
+  {% set p = phase(appt) %}
+  <span class="badge badge-{{ p | replace(' ', '-') }}">{{ p }}</span>
+{%- endmacro %}
+
+{% macro fictitious_tag() -%}
+  <span class="badge badge-ficticio" title="Registro fictício para demonstração">dados fictícios</span>
+{%- endmacro %}
+
+{% macro record_view(record) -%}
+  <div class="record">
+    <div class="record-head">
+      <strong>Registro clínico demonstrativo</strong> {{ fictitious_tag() }}
+      <span class="muted">atualizado em {{ record.updated_at | dt }}</span>
+    </div>
+    <dl>
+      <dt>Queixa principal</dt><dd>{{ record.chief_complaint }}</dd>
+      <dt>Anamnese</dt><dd>{{ record.anamnesis or '—' }}</dd>
+      <dt>Avaliação clínica</dt><dd>{{ record.assessment or '—' }}</dd>
+      <dt>Conduta</dt><dd>{{ record.conduct or '—' }}</dd>
+      <dt>Observações</dt><dd>{{ record.notes or '—' }}</dd>
+    </dl>
+  </div>
+{%- endmacro %}

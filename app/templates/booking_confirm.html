@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Confirmar agendamento{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Confirmar agendamento</h1>
+  <dl class="summary">
+    <dt>Médico(a)</dt><dd>{{ doctor.name }}</dd>
+    <dt>Especialidade</dt><dd>{{ doctor.doctor_profile.specialty }}</dd>
+    <dt>Data</dt><dd>{{ start | date_long }}</dd>
+    <dt>Horário</dt><dd>{{ start | hm }} (30 minutos)</dd>
+    <dt>Modalidade</dt><dd>Teleconsulta (sala virtual)</dd>
+  </dl>
+  <p class="muted small">A disponibilidade será verificada novamente ao confirmar. Se o horário tiver sido ocupado, você será avisado.</p>
+  <form method="post" action="/agendar" class="actions">
+    <input type="hidden" name="doctor_id" value="{{ doctor.id }}">
+    <input type="hidden" name="start_at" value="{{ start_iso }}">
+    <a class="btn btn-secondary" href="/medicos/{{ doctor.id }}">Escolher outro horário</a>
+    <button class="btn btn-primary" type="submit">Confirmar agendamento</button>
+  </form>
+</section>
+{% endblock %}

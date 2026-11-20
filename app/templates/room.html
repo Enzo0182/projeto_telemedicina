@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% from "_macros.html" import phase_badge %}
+{% block title %}Sala da consulta #{{ appt.id }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Sala virtual · consulta #{{ appt.id }} {{ phase_badge(appt) }}</h1>
+    <p class="muted">{{ appt.start_at | date_long }}, {{ appt.start_at | hm }}–{{ appt.end_at | hm }} ·
+      {{ appt.doctor.name }} e {{ appt.patient.name }}</p>
+  </div>
+  <a class="btn btn-secondary" href="/consultas/{{ appt.id }}">Detalhes da consulta</a>
+</div>
+
+<div class="alert alert-aviso small">
+  Demonstração de WebRTC: a mídia trafega diretamente entre os navegadores; o servidor faz apenas a sinalização.
+  Não use para atendimento real.
+</div>
+
+<div id="media-warning" class="alert alert-erro" role="alert" hidden></div>
+
+<div class="room">
+  <div class="videos">
+    <figure class="video-box remote">
+      <video id="remote-video" autoplay playsinline></video>
+      <figcaption>{{ appt.patient.name if user.is_doctor else appt.doctor.name }} <span id="remote-media-label" class="muted">(sem mídia)</span></figcaption>
+      <div id="remote-placeholder" class="placeholder">Aguardando o outro participante…</div>
+    </figure>
+    <figure class="video-box local">
+      <video id="local-video" autoplay playsinline muted></video>
+      <figcaption>Você</figcaption>
+    </figure>
+  </div>
+
+  <aside class="room-side">
+    <div class="card status-card">
+      <h2>Estado da conexão</h2>
+      <dl class="status-list">
+        <dt>Sinalização (WebSocket)</dt><dd><span id="st-signal" class="st st-warn">conectando…</span></dd>
+        <dt>Outro participante</dt><dd><span id="st-peer" class="st st-warn">ausente</span></dd>
+        <dt>Conexão WebRTC</dt><dd><span id="st-pc" class="st st-idle">não iniciada</span></dd>
+        <dt>ICE</dt><dd><span id="st-ice" class="st st-idle">—</span></dd>
+        <dt>Câmera</dt><dd><span id="st-cam" class="st st-warn">verificando…</span></dd>
+        <dt>Microfone</dt><dd><span id="st-mic" class="st st-warn">verificando…</span></dd>
+      </dl>
+      <div class="controls">
+        <button id="btn-cam" class="btn btn-secondary" type="button" disabled>Desligar câmera</button>
+        <button id="btn-mic" class="btn btn-secondary" type="button" disabled>Silenciar microfone</button>
+        <button id="btn-retry" class="btn btn-secondary" type="button">Reconectar</button>
+        <button id="btn-hangup" class="btn btn-danger" type="button">Sair da sala</button>
+      </div>
+    </div>
+
+    <div class="card chat-card">
+      <h2>Mensagens (canal de dados P2P)</h2>
+      <div id="chat-log" class="chat-log" aria-live="polite"><p class="muted small">Disponível quando a conexão WebRTC for estabelecida.</p></div>
+      <form id="chat-form" class="chat-form">
+        <label for="chat-input" class="sr-only">Mensagem</label>
+        <input id="chat-input" maxlength="500" placeholder="Digite uma mensagem fictícia" disabled>
+        <button class="btn btn-primary" type="submit" disabled id="chat-send">Enviar</button>
+      </form>
+    </div>
+
+    {% if user.is_doctor %}
+    <div class="card">
+      <h2>Prontuário</h2>
+      <p class="small">Abra o formulário em outra aba para não interromper a chamada.</p>
+      <a class="btn btn-primary btn-block" href="/consultas/{{ appt.id }}/prontuario" target="_blank" rel="noopener">Abrir registro clínico</a>
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <h2>Log de eventos</h2>
+      <ol id="event-log" class="event-log"></ol>
+    </div>
+  </aside>
+</div>
+<script type="application/json" id="room-config">{{ room_config | safe }}</script>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', path='js/room.js') }}"></script>
+{% endblock %}

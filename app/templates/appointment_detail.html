@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "_macros.html" import phase_badge, record_view %}
+{% block title %}Consulta #{{ appt.id }}{% endblock %}
+{% block content %}
+<p><a href="{{ '/medico' if user.is_doctor else '/paciente' }}">← Voltar ao painel</a></p>
+<section class="card">
+  <h1>Consulta #{{ appt.id }} {{ phase_badge(appt) }}</h1>
+  {% if appt.is_confirmed %}<p class="muted small">Agendamento confirmado em {{ appt.created_at | dt }}.</p>{% endif %}
+  <dl class="summary">
+    <dt>Data</dt><dd>{{ appt.start_at | date_long }}</dd>
+    <dt>Horário</dt><dd>{{ appt.start_at | hm }}–{{ appt.end_at | hm }}</dd>
+    <dt>Médico(a)</dt><dd>{{ appt.doctor.name }} · {{ appt.doctor.doctor_profile.specialty }}</dd>
+    <dt>Paciente</dt><dd>{{ appt.patient.name }}</dd>
+    <dt>Sala virtual</dt><dd>{% if appt.is_confirmed %}<code>sala-{{ appt.room_code[:8] }}</code> (acesso restrito aos participantes){% else %}indisponível{% endif %}</dd>
+    {% if appt.cancelled_at %}<dt>Cancelada em</dt><dd>{{ appt.cancelled_at | dt }}</dd>{% endif %}
+  </dl>
+  <div class="actions">
+    {% if appt.is_confirmed and phase(appt) != 'encerrada' %}
+      <a class="btn btn-primary" href="/consultas/{{ appt.id }}/sala">Entrar na sala</a>
+    {% endif %}
+    {% if can_edit_record %}
+      <a class="btn btn-secondary" href="/consultas/{{ appt.id }}/prontuario">{{ 'Editar' if appt.record else 'Registrar' }} prontuário</a>
+    {% endif %}
+    {% if appt.is_confirmed and phase(appt) == 'agendada' and not appt.record %}
+      <form method="post" action="/consultas/{{ appt.id }}/cancelar" class="inline"
+            onsubmit="return confirm('Cancelar esta consulta?');">
+        <button class="btn btn-danger" type="submit">Cancelar consulta</button>
+      </form>
+    {% endif %}
+  </div>
+  {% if user.is_doctor and appt.is_confirmed and not can_edit_record and phase(appt) == 'agendada' %}
+    <p class="muted small">O prontuário poderá ser registrado a partir de 15 minutos antes do início da consulta.</p>
+  {% endif %}
+</section>
+
+{% if appt.record %}
+<section class="card">{{ record_view(appt.record) }}</section>
+{% elif appt.is_confirmed %}
+<section class="card"><p class="empty">Ainda não há registro clínico para esta consulta.</p></section>
+{% endif %}
+{% endblock %}

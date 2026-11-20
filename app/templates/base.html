@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Telemedicina{% endblock %} · Protótipo acadêmico</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+</head>
+<body>
+  <div class="demo-banner" role="note">
+    <strong>Protótipo acadêmico.</strong> Todos os dados são fictícios. Não utilize em atendimentos clínicos reais.
+  </div>
+  <header class="topbar">
+    <a class="brand" href="/">Tele<span>Med</span> <small>demo</small></a>
+    {% if user %}
+    <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Abrir menu">
+    <label for="nav-toggle" class="nav-toggle-label" aria-hidden="true">☰</label>
+    <nav class="nav">
+      {% if user.is_patient %}
+        <a href="/paciente">Minhas consultas</a>
+        <a href="/medicos">Médicos e horários</a>
+        <a href="/paciente/historico">Histórico clínico</a>
+      {% else %}
+        <a href="/medico">Minha agenda</a>
+        <a href="/medico/disponibilidade">Disponibilidade</a>
+      {% endif %}
+      <span class="who">{{ user.name }} · <em>{{ 'Médico(a)' if user.is_doctor else 'Paciente' }}</em></span>
+      <form method="post" action="/sair" class="inline"><button class="btn btn-link" type="submit">Sair</button></form>
+    </nav>
+    {% endif %}
+  </header>
+
+  <main class="container">
+    {% if flash %}
+      <div class="alert alert-{{ flash.kind }}" role="status">{{ flash.message }}</div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    Protótipo para fins acadêmicos e demonstrativos · dados fictícios · horários em {{ timezone_name }}
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

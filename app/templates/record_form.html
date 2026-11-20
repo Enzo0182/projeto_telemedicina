@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field_error, fictitious_tag %}
+{% block title %}Registro clínico{% endblock %}
+{% block content %}
+<p><a href="/consultas/{{ appt.id }}">← Voltar à consulta</a></p>
+<section class="card">
+  <h1>Registro clínico {{ fictitious_tag() }}</h1>
+  <p class="muted">Consulta #{{ appt.id }} · {{ appt.patient.name }} · {{ appt.start_at | dt }}</p>
+  <div class="alert alert-aviso">Prontuário demonstrativo: registre apenas informações fictícias.</div>
+  <form method="post" action="/consultas/{{ appt.id }}/prontuario" novalidate>
+    <label for="chief_complaint">Queixa principal *</label>
+    <textarea id="chief_complaint" name="chief_complaint" rows="2" maxlength="1000" required>{{ values.chief_complaint }}</textarea>
+    {{ field_error(errors, 'chief_complaint') }}
+    <label for="anamnesis">Anamnese</label>
+    <textarea id="anamnesis" name="anamnesis" rows="4" maxlength="5000">{{ values.anamnesis }}</textarea>
+    {{ field_error(errors, 'anamnesis') }}
+    <label for="assessment">Avaliação clínica</label>
+    <textarea id="assessment" name="assessment" rows="3" maxlength="5000">{{ values.assessment }}</textarea>
+    {{ field_error(errors, 'assessment') }}
+    <label for="conduct">Conduta</label>
+    <textarea id="conduct" name="conduct" rows="3" maxlength="5000">{{ values.conduct }}</textarea>
+    {{ field_error(errors, 'conduct') }}
+    <label for="notes">Observações</label>
+    <textarea id="notes" name="notes" rows="2" maxlength="5000">{{ values.notes }}</textarea>
+    {{ field_error(errors, 'notes') }}
+    <div class="actions">
+      <a class="btn btn-secondary" href="/consultas/{{ appt.id }}">Cancelar</a>
+      <button class="btn btn-primary" type="submit">Salvar registro</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Médicos{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Médicos e horários</h1>
+    <p class="muted">Profissionais fictícios cadastrados para demonstração.</p>
+  </div>
+  <form method="get" action="/medicos" class="filter">
+    <label for="especialidade" class="sr-only">Especialidade</label>
+    <select id="especialidade" name="especialidade" onchange="this.form.submit()">
+      <option value="">Todas as especialidades</option>
+      {% for s in specialties %}
+      <option value="{{ s }}" {% if s == selected %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <noscript><button class="btn btn-secondary" type="submit">Filtrar</button></noscript>
+  </form>
+</div>
+
+<div class="grid">
+  {% for d, free in doctors %}
+  <article class="card doctor-card">
+    <div class="avatar" aria-hidden="true">{{ d.name.split(' ')[1][0] if d.name.split(' ')|length > 1 else d.name[0] }}</div>
+    <h2>{{ d.name }}</h2>
+    <p class="specialty">{{ d.doctor_profile.specialty }}</p>
+    <p class="bio">{{ d.doctor_profile.bio }}</p>
+    <p class="small muted">{{ d.doctor_profile.registry }}</p>
+    <p class="slots-count {{ 'none' if free == 0 }}">
+      {% if free %}{{ free }} horário{{ 's' if free != 1 }} disponíve{{ 'is' if free != 1 else 'l' }}{% else %}Sem horários disponíveis{% endif %}
+    </p>
+    <a class="btn btn-primary btn-block" href="/medicos/{{ d.id }}">Ver horários</a>
+  </article>
+  {% else %}
+  <p class="empty">Nenhum médico encontrado.</p>
+  {% endfor %}
+</div>
+{% endblock %}
